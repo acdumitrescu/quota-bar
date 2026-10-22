@@ -28,6 +28,7 @@ struct MenuPanel: View {
         }
         .frame(width: 340)
         .fixedSize(horizontal: false, vertical: true)
+        .onAppear { if Demo.isOn { Demo.openSettings = showSettings } }
     }
 
     private var emptyState: some View {

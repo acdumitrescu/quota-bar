@@ -6,6 +6,11 @@ public actor History {
     public struct Sample: Sendable, Hashable {
         public let at: Date
         public let value: Double
+
+        public init(at: Date, value: Double) {
+            self.at = at
+            self.value = value
+        }
     }
 
     public static let retentionDays = 35

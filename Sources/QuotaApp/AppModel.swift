@@ -28,6 +28,15 @@ final class AppModel: ObservableObject {
 
     init(settings: AppSettings) {
         self.settings = settings
+        if Demo.isOn {
+            history = nil
+            states = Demo.snapshots().mapValues { ProviderState(snapshot: $0, updatedAt: Date()) }
+            sparklines = Demo.sparklines()
+            keyStatus = Dictionary(uniqueKeysWithValues: ProviderID.allCases.filter(\.needsKey).map { ($0, true) })
+            lastRefresh = Date()
+            Demo.startCapturing()
+            return
+        }
         history = try? History()
         reloadKeyStatus()
         startLoop()
@@ -47,7 +56,7 @@ final class AppModel: ObservableObject {
     }
 
     func refresh() async {
-        guard !isRefreshing else { return }
+        guard !isRefreshing, !Demo.isOn else { return }
         isRefreshing = true
         defer { isRefreshing = false }
 
@@ -122,6 +131,7 @@ final class AppModel: ObservableObject {
     }
 
     func saveKey(_ key: String, for id: ProviderID) {
+        guard !Demo.isOn else { return }
         let trimmed = key.trimmingCharacters(in: .whitespacesAndNewlines)
         keychain.setSecret(trimmed.isEmpty ? nil : trimmed, for: id)
         reloadKeyStatus()
@@ -133,6 +143,7 @@ final class AppModel: ObservableObject {
     func exportCSV() async -> String { await history?.exportCSV() ?? "" }
 
     func deleteAllData() async {
+        guard !Demo.isOn else { return }
         await history?.deleteAll()
         keychain.removeAll()
         settings.reset()
@@ -143,6 +154,7 @@ final class AppModel: ObservableObject {
     }
 
     func setLaunchAtLogin(_ on: Bool) {
+        guard !Demo.isOn else { return }
         do {
             if on { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }
         } catch {

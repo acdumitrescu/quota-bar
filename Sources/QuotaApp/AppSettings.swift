@@ -16,7 +16,7 @@ final class AppSettings: ObservableObject {
         }
     }
 
-    private let defaults = UserDefaults.standard
+    private let defaults = Demo.isOn ? Demo.defaults : UserDefaults.standard
 
     /// Every provider is off until the user turns it on.
     @Published var enabled: [ProviderID] { didSet { save("enabled", enabled.map(\.rawValue)) } }

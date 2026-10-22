@@ -4,15 +4,18 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct SettingsView: View {
+    @State private var tab = 0
+
     var body: some View {
-        TabView {
-            ProvidersTab().tabItem { Label("Providers", systemImage: "square.stack.3d.up") }
-            DisplayTab().tabItem { Label("Display", systemImage: "menubar.rectangle") }
-            AlertsTab().tabItem { Label("Alerts", systemImage: "bell") }
-            PrivacyTab().tabItem { Label("Privacy", systemImage: "lock.shield") }
-            AboutTab().tabItem { Label("About", systemImage: "info.circle") }
+        TabView(selection: $tab) {
+            ProvidersTab().tabItem { Label("Providers", systemImage: "square.stack.3d.up") }.tag(0)
+            DisplayTab().tabItem { Label("Display", systemImage: "menubar.rectangle") }.tag(1)
+            AlertsTab().tabItem { Label("Alerts", systemImage: "bell") }.tag(2)
+            PrivacyTab().tabItem { Label("Privacy", systemImage: "lock.shield") }.tag(3)
+            AboutTab().tabItem { Label("About", systemImage: "info.circle") }.tag(4)
         }
         .frame(width: 520, height: 460)
+        .onReceive(Demo.tab) { tab = $0 }
     }
 }
 
@@ -177,7 +180,7 @@ struct PrivacyTab: View {
             Section("History") {
                 Toggle("Keep local history for sparklines and DeepSeek usage", isOn: $settings.keepHistory)
                 LabeledContent("Stored at") {
-                    Text(model.history.map { Format.tildePath($0.url) } ?? "unavailable")
+                    Text(Format.tildePath(model.history?.url ?? History.defaultURL))
                         .font(.caption.monospaced()).textSelection(.enabled)
                 }
                 HStack {

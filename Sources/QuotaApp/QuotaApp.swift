@@ -8,6 +8,7 @@ struct QuotaApp: App {
     @StateObject private var model: AppModel
 
     init() {
+        if Demo.isOn { Demo.resetDefaults() }
         let settings = AppSettings()
         _settings = StateObject(wrappedValue: settings)
         _model = StateObject(wrappedValue: AppModel(settings: settings))
