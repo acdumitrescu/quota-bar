@@ -21,7 +21,7 @@ Hitting a Claude limit in the middle of a task is frustrating. Finding out your 
 - **Alerts:** an optional notification at 80% or 95%, when a limit resets, or when a balance runs low.
 - **History:** small 7-day trend lines, stored only on your Mac.
 
-## Built to be trusted
+## No tracking, no cloud
 
 Quota sees your API keys and your Claude login, so it's built to deserve that access.
 
