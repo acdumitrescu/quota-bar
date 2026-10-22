@@ -1,0 +1,33 @@
+name: Release
+
+# Manual only. Builds an ad-hoc-signed universal app and CLI and attaches them to a draft release.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to create, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - run: scripts/privacy-check.sh
+      - run: swift test
+      - run: scripts/build-app.sh --zip
+      - name: Draft release
+        # The tag goes through an env var, never straight into the script, so it can't inject shell code.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "tag must look like v1.2.3" >&2; exit 1; }
+          gh release create "$TAG" build/*.zip --repo "$GITHUB_REPOSITORY" --draft --generate-notes \
+            --title "Quota $TAG"
