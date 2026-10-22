@@ -29,8 +29,13 @@ hosts=$(grep -rhoE 'https://[A-Za-z0-9.-]+' Sources | sort -u | grep -vE "$allow
 
 # 5. Git authors and committers must use noreply addresses.
 if git rev-parse HEAD >/dev/null 2>&1; then
-  bad=$(git log --format='%ae%n%ce' | sort -u | grep -vE '@(users\.)?noreply\.(github\.com|anthropic\.com)$')
+  bad=$(git log --format='%ae%n%ce' | sort -u | grep -vE '@(users\.)?noreply\.(github\.com|anthropic\.com)$|^noreply@github\.com$')
   [ -n "$bad" ] && report "commits with non-noreply emails:\n$bad"
+  # Web edits on GitHub use the profile's display name, which may be a real name.
+  if [ -f .github/allowed-authors ]; then
+    bad=$(git log --format='%an%n%cn' | sort -u | grep -vxF -f <(grep -v '^#' .github/allowed-authors))
+    [ -n "$bad" ] && report "commits by names not in .github/allowed-authors:\n$bad"
+  fi
 fi
 
 # 6. Personal denylist (not committed).
